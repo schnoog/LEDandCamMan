@@ -15,7 +15,6 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
     }
         #camera-container {
             position: relative;
-            height: 450px; /* Added fixed height */
         }
         #camera-controls {
             position: absolute;
@@ -32,7 +31,6 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
             width: 100%;
             height: 100%;
             border: none;
-            transform: rotate(180deg); /* Rotate iframe by 180 degrees */
         }
         .control-button {
             margin: 5px;
@@ -40,9 +38,6 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
             background-color: #f0f0f0;
             border: 1px solid #ccc;
             cursor: pointer;
-        }
-        #x-coordinate, #y-coordinate {
-            margin-top: 10px;
         }    
 </style>
 </head>
@@ -71,14 +66,6 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
                 <button class="control-button" onclick="moveCamera('right')">Right</button>
             </div>
             <button class="control-button" onclick="moveCamera('down')">Down</button>
-            <select id="step-selector">
-                <option value="1">1</option>
-                <option value="5">5</option>
-                <option value="10">10</option>
-            </select> <!-- Added dropdown field -->
-            <button class="control-button" onclick="printCamera()">Print</button> <!-- Added print button -->
-            <div id="x-coordinate">X Coordinate: <span id="x-value"></span></div>
-            <div id="y-coordinate">Y Coordinate: <span id="y-value"></span></div>
         </div>
     </div>
 
@@ -96,20 +83,19 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
                         var x = parseInt(pos[0]);
                         var y = parseInt(pos[1]);
 
-                        // Modify position based on direction and step increment
-                        var step = parseInt(document.getElementById('step-selector').value);
+                        // Modify position based on direction
                         switch (direction) {
                             case 'up':
-                                y = Math.max(0, y - step);
+                                y = Math.max(0, y - 10);
                                 break;
                             case 'down':
-                                y = Math.min(255, y + step);
+                                y = Math.min(255, y + 10);
                                 break;
                             case 'left':
-                                x = Math.max(0, x + step);
+                                x = Math.max(0, x + 10);
                                 break;
                             case 'right':
-                                x = Math.min(255, x - step);
+                                x = Math.min(255, x - 10);
                                 break;
                         }
 
@@ -120,10 +106,6 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
                         var updateRequest = new XMLHttpRequest();
                         updateRequest.open('GET', newPosition, true);
                         updateRequest.send();
-
-                        // Update X and Y coordinate fields
-                        document.getElementById('x-value').innerText = x;
-                        document.getElementById('y-value').innerText = y;
                     } else {
                         console.error('Failed to get current position');
                     }
@@ -131,13 +113,6 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
             };
             xhr.open('GET', url, true);
             xhr.send();
-        }
-        
-        function printCamera() {
-            var printUrl = '/cam/print';
-            var printRequest = new XMLHttpRequest();
-            printRequest.open('GET', printUrl, true);
-            printRequest.send();
         }
     </script>
 
