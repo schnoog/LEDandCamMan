@@ -13,6 +13,32 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
     #color-picker-container {
         margin-bottom: 20px;
     }
+        #camera-container {
+            position: relative;
+        }
+        #camera-controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #camera-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .control-button {
+            margin: 5px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }    
 </style>
 </head>
 <body>
@@ -30,6 +56,65 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
 </div>
 
 <button onclick="sendColor()">Set Color</button>
+<hr>
+    <div id="camera-container">
+        <iframe id="camera-iframe" src="http://192.168.178.35/webcam/?action=stream"></iframe>
+        <div id="camera-controls">
+            <button class="control-button" onclick="moveCamera('up')">Up</button>
+            <div>
+                <button class="control-button" onclick="moveCamera('left')">Left</button>
+                <button class="control-button" onclick="moveCamera('right')">Right</button>
+            </div>
+            <button class="control-button" onclick="moveCamera('down')">Down</button>
+        </div>
+    </div>
+
+    <script>
+        function moveCamera(direction) {
+            var url = '/cam/pos';
+
+            // Get current position
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = xhr.responseText;
+                        var pos = response.split(',');
+                        var x = parseInt(pos[0]);
+                        var y = parseInt(pos[1]);
+
+                        // Modify position based on direction
+                        switch (direction) {
+                            case 'up':
+                                y = Math.max(0, y - 10);
+                                break;
+                            case 'down':
+                                y = Math.min(255, y + 10);
+                                break;
+                            case 'left':
+                                x = Math.max(0, x + 10);
+                                break;
+                            case 'right':
+                                x = Math.min(255, x - 10);
+                                break;
+                        }
+
+                        // Update camera position
+                        var newPosition = '/cam/' + x + '/' + y;
+                        console.log('New position:', newPosition);
+                        // Send request to update camera position without changing page content
+                        var updateRequest = new XMLHttpRequest();
+                        updateRequest.open('GET', newPosition, true);
+                        updateRequest.send();
+                    } else {
+                        console.error('Failed to get current position');
+                    }
+                }
+            };
+            xhr.open('GET', url, true);
+            xhr.send();
+        }
+    </script>
 
 <script>
     function sendColor() {
